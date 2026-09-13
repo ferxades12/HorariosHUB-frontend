@@ -1,23 +1,29 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useAuth } from '@/hooks/useAuth';
 
 const MIN_DELAY_MS = 10_000;   // 10 sec
 const MAX_DELAY_MS = 300_000;  // 5 min
 const DISPLAY_MS   = 3_500;
 const FADE_MS      = 500;
 
+const EXCLUDE_USERS = ["uo300028@uniovi.es"]
+
 // Variables de módulo: persisten aunque el componente se desmonte por navegación
 let audioUnlocked = false;  // el usuario ya hizo click alguna vez
 let eggDone = false;        // el easter egg ya se mostró esta sesión
 
 export function EasterEgg() {
+  const { user } = useAuth();
   const [phase, setPhase] = useState<'hidden' | 'in' | 'visible' | 'out'>('hidden');
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     // No volver a programar si ya se mostró esta sesión
     if (eggDone) return;
+
+    if (user && EXCLUDE_USERS.includes(user.email)) return;
 
     const audio = new Audio('/easter-egg/audio.mp3');
     audioRef.current = audio;
@@ -76,19 +82,19 @@ export function EasterEgg() {
         opacity,
         transition: `opacity ${FADE_MS}ms ease-in-out`,
       }}
-    >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src="/easter-egg/photo.jpg"
-        alt=""
-        style={{
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/easter-egg/photo.jpg"
+          alt=""
+          style={{
           width: 'min(88vw, 640px)',
           maxHeight: '85vh',
-          objectFit: 'contain',
-          borderRadius: 8,
-          boxShadow: '0 8px 48px rgba(0,0,0,0.6)',
-        }}
-      />
+            objectFit: 'contain',
+            borderRadius: 8,
+            boxShadow: '0 8px 48px rgba(0,0,0,0.6)',
+          }}
+        />
     </div>
   );
 }
